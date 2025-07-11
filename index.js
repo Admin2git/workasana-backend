@@ -21,6 +21,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 initializeToDatabase();
 
+app.get("/", (req, res) => {
+  res.json({ message: "this is task management api" });
+});
+
 async function createUser({ name, email, password }) {
   try {
     const user = new userModel({ name, email, password });
