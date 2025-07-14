@@ -12,6 +12,8 @@ const taskSchema = new mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   ],
   tags: [{ type: String }],
+
+  dueDate: { type: Date, required: true },
   timeToComplete: { type: Number, required: true },
   status: {
     type: String,

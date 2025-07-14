@@ -67,6 +67,19 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
+app.get("/users", auth, async (req, res) => {
+  try {
+    const user = await userModel.find();
+    if (user.length > 0) {
+      res.status(201).json(user);
+    } else {
+      res.status(404).json({ error: "No user found." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fatch user." });
+  }
+});
+
 app.post("/projects", auth, async (req, res) => {
   try {
     const newProject = new project(req.body);
