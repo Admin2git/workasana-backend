@@ -14,6 +14,7 @@ const team = require("./models/team");
 
 const corsOptions = {
   origin: "*",
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
   credentials: true,
   optionSuccessStatus: 200,
 };
