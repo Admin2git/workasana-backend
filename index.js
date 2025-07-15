@@ -105,6 +105,20 @@ app.get("/projects", auth, async (req, res) => {
   }
 });
 
+app.delete("/projects/:id", auth, async (req, res) => {
+  try {
+    const deletedProject = await project.findByIdAndDelete(req.params.id);
+
+    if (deletedProject) {
+      res.status(200).json(deletedProject);
+    } else {
+      res.status(404).json({ error: "No project found." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fatch project." });
+  }
+});
+
 app.post("/teams", auth, async (req, res) => {
   try {
     const newTeam = new team(req.body);
@@ -127,6 +141,20 @@ app.get("/teams", auth, async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fatch project." });
+  }
+});
+
+app.delete("/teams/:id", auth, async (req, res) => {
+  try {
+    const deletedTeam = await team.findByIdAndDelete(req.params.id);
+
+    if (deletedTeam) {
+      res.status(200).json(deletedTeam);
+    } else {
+      res.status(404).json({ error: "No team found." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fatch team." });
   }
 });
 
