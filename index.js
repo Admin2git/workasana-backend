@@ -241,6 +241,68 @@ app.get("/tasks", auth, async (req, res) => {
   }
 });
 
+app.get("/report/last-week", async (req, res) => {
+  try {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const tasks = await taskModel
+      .find({
+        status: "Completed",
+        updatedAt: { $gte: oneWeekAgo },
+      })
+      .exec();
+
+    res.status(200).json({ tasks });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/report/pending-work", async (req, res) => {
+  try {
+    const result = await taskModel.aggregate([
+      {
+        $match: {
+          status: { $ne: "Completed" },
+          project: { $exists: true, $ne: null },
+          team: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: "$project",
+          pendingWork: { $sum: "$timeToComplete" },
+        },
+      },
+    ]);
+
+    console.log(result);
+    res.status(200).json({ groupedBy: "project", data: result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/report/closed-tasks", async (req, res) => {
+  try {
+    const result = await taskModel.aggregate([
+      { $match: { status: "Completed" } },
+      {
+        $group: {
+          _id: "$team",
+          closedCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.status(200).json({ groupedBy: "team", data: result });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
