@@ -244,17 +244,29 @@ app.get("/tasks", auth, async (req, res) => {
 app.get("/report/last-week", async (req, res) => {
   try {
     const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 6); // include today
 
-    const tasks = await taskModel
-      .find({
-        status: "Completed",
-        updatedAt: { $gte: oneWeekAgo },
-      })
-      .exec();
+    const result = await taskModel.aggregate([
+      {
+        $match: {
+          status: "Completed",
+          updatedAt: { $gte: oneWeekAgo },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" },
+          },
+          totalCompleted: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
 
-    res.status(200).json({ tasks });
+    res.status(200).json(result);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -272,7 +284,26 @@ app.get("/report/pending-work", async (req, res) => {
       {
         $group: {
           _id: "$project",
-          pendingWork: { $sum: "$timeToComplete" },
+          pendingWork: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "projects", // name of the projects collection
+          localField: "_id", // `_id` from the $group, which is project id
+          foreignField: "_id", // `_id` in the projects collection
+          as: "projectInfo",
+        },
+      },
+      {
+        $unwind: "$projectInfo",
+      },
+      {
+        $project: {
+          _id: 0,
+          projectId: "$_id",
+          projectName: "$projectInfo.name",
+          pendingWork: 1,
         },
       },
     ]);
@@ -293,6 +324,25 @@ app.get("/report/closed-tasks", async (req, res) => {
         $group: {
           _id: "$team",
           closedCount: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "teams", // name of the projects collection
+          localField: "_id", // _id from the $group, which is project id
+          foreignField: "_id", // _id in the projects collection
+          as: "teamInfo",
+        },
+      },
+      {
+        $unwind: "$teamInfo",
+      },
+      {
+        $project: {
+          _id: 0,
+          teamId: "$_id",
+          teamName: "$teamInfo.name",
+          closedCount: 1,
         },
       },
     ]);
