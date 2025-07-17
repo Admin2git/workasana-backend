@@ -244,13 +244,17 @@ app.get("/tasks", auth, async (req, res) => {
 app.get("/report/last-week", async (req, res) => {
   try {
     const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 6); // include today
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 6);
+    oneWeekAgo.setUTCHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setUTCHours(23, 59, 59, 999);
 
     const result = await taskModel.aggregate([
       {
         $match: {
           status: "Completed",
-          updatedAt: { $gte: oneWeekAgo },
+          updatedAt: { $gte: oneWeekAgo, $lte: today },
         },
       },
       {
