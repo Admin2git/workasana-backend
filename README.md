@@ -34,8 +34,8 @@ This is the backend service for **Workasana**, a full-stack task & team manageme
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone <your-repo-url>
-cd backend
+git clone https://github.com/Admin2git/workasana-backend.git
+cd workasana-backend
 ```
 ### 2️⃣ Install dependencies
 ```bash
