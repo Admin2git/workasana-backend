@@ -13,7 +13,10 @@ const taskModel = require("./models/task.model");
 const team = require("./models/team");
 
 const corsOptions = {
-  origin: ["https://workasana-frontend-sable.vercel.app,http://localhost:5173"],
+  origin: [
+    "https://workasana-frontend-sable.vercel.app",
+    "http://localhost:5173",
+  ],
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
   credentials: true,
   optionSuccessStatus: 200,
